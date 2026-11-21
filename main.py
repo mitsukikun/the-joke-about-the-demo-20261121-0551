@@ -1,30 +1,40 @@
 #!/usr/bin/env python3
-"""The joke about the demo.
+"""One-line joke for the demo room.
 
-A one-line joke about working beside AI coding agents, for a room
-watching a demo. Pure standard library; no network. Writes the joke
-to /output/entry.txt (128 characters).
+Composes a single joke about pairing with an AI coding agent during a
+live demo, then saves it as plain text. Standard library only, and it
+never touches the network.
 """
 
-import os
+from pathlib import Path
 
-JOKE = (
-    "In the live demo, my coding agent fixed the bug, broke the build, "
-    "and left an apology in the commit message longer than the fix."
-)
+OUT = Path("/output/entry.txt")
+
+PARTS = [
+    "In the live demo, my coding agent ",
+    "fixed the bug, broke the build, and ",
+    "left an apology in the commit message ",
+    "longer than the fix.",
+]
+
+TEXT = "".join(PARTS)
+
+
+def check(text):
+    if not text.strip():
+        raise SystemExit("joke is blank")
+    if text != text.strip() or "  " in text:
+        raise SystemExit("joke has stray whitespace")
+    if len(text) > 280:
+        raise SystemExit("joke is too long: %d chars" % len(text))
 
 
 def main():
-    if not 1 <= len(JOKE) <= 280 or not JOKE.strip():
-        raise SystemExit("entry text must be 1-280 non-blank characters")
-    os.makedirs("/output", exist_ok=True)
-    with open("/output/entry.txt", "w", encoding="utf-8") as f:
-        f.write(JOKE)
-    with open("/output/entry.txt", encoding="utf-8") as f:
-        written = f.read()
-    if written != JOKE:
-        raise SystemExit("entry.txt content mismatch after write")
+    check(TEXT)
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    OUT.write_text(TEXT, encoding="utf-8")
+    if OUT.read_text(encoding="utf-8") != TEXT:
+        raise SystemExit("saved joke differs from the text")
 
 
-if __name__ == "__main__":
-    main()
+main()
